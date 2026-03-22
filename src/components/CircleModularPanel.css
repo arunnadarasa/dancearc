@@ -1,0 +1,18 @@
+.circle-mod__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.circle-mod__out {
+  margin: 0.75rem 0 0;
+  padding: 0.65rem 0.85rem;
+  background: #09090b;
+  color: #e4e4e7;
+  border-radius: 0.5rem;
+  font-size: 0.78rem;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}

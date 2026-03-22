@@ -1,0 +1,46 @@
+{
+  "name": "dancearc",
+  "description": "DanceTech Protocol — DanceArc MVP on Arc + USDC + x402 + Circle (Nanopayments / Gateway)",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "server": "node server/index.js",
+    "dev:full": "concurrently \"npm run server\" \"npm run dev\"",
+    "build:llm": "node scripts/build-llm-full.mjs",
+    "burst": "node scripts/burst-demo.mjs",
+    "circle:entity-secret:generate": "node scripts/circle-register-entity-secret.mjs generate",
+    "circle:entity-secret:register": "node scripts/circle-register-entity-secret.mjs register",
+    "build": "npm run build:llm && tsc -p tsconfig.app.json --noEmit && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "start:local": "concurrently \"npm run server\" \"vite preview --host 127.0.0.1 --port 5173\""
+  },
+  "dependencies": {
+    "@circle-fin/app-kit": "^1.1.0",
+    "@circle-fin/developer-controlled-wallets": "^10.2.0",
+    "@circle-fin/modular-wallets-core": "^1.0.13",
+    "buffer": "^6.0.3",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "viem": "^2.47.6"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "@types/node": "^24.12.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "concurrently": "^9.2.1",
+    "eslint": "^9.39.4",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "globals": "^17.4.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.57.0",
+    "vite": "^8.0.1"
+  }
+}

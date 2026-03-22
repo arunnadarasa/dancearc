@@ -1,0 +1,114 @@
+# DanceArc LLM bundle
+
+
+
+---
+
+# File: README.md
+
+# DanceArc
+
+**DanceTech Protocol — DanceArc MVP** — reference hub and API on **Arc** with **native USDC**, **x402-style HTTP 402** challenges, and hooks for **Circle Gateway** (verify/settle) and **Nanopayments**.
+
+## Stack
+
+- **Frontend:** React 19, Vite 8, TypeScript
+- **Chain:** Arc Testnet (`5042002`) via `viem/chains` [`arcTestnet`](https://github.com/wevm/viem/blob/main/src/chains/definitions/arcTestnet.ts)
+- **Payments:** `402 Payment Required` + `X-Payment-Tx` (tx hash) + on-chain verification of **native USDC** transfers; optional `CIRCLE_API_KEY` → Circle Gateway `POST /v1/gateway/v1/x402/verify`
+- **x402:** HTTP `402` + JSON body (`x402Version`, `accepts[]`) aligned with the [x402](https://www.npmjs.com/package/x402) shape; Arc uses a custom `arc-native-usdc` accept block until the upstream schema lists Arc (`5042002`)
+- **Circle:** [`@circle-fin/app-kit`](https://www.npmjs.com/package/@circle-fin/app-kit) for Bridge (see `/bridge`); [`@circle-fin/modular-wallets-core`](https://www.npmjs.com/package/@circle-fin/modular-wallets-core) for Modular Wallets (see [Web SDK](https://developers.circle.com/w3s/modular-wallets-web-sdk))
+- **Wallet UI:** `InjectedWalletBar` uses **EIP-1193** (`window.ethereum`) for **native USDC** transfers on Arc. **`CircleModularPanel`** calls `toModularTransport` + `createPublicClient` to verify your **Client Key** against `https://modular-sdk.circle.com` (override with `VITE_CIRCLE_MODULAR_CLIENT_URL`). Passkey login and smart-account sends follow [Modular Wallets Web SDK](https://developers.circle.com/w3s/modular-wallets-web-sdk).
+
+## Quick start
+
+```bash
+npm install
+cp .env.example .env
+# Terminal 1
+npm run server
+# Terminal 2
+npm run dev
+```
+
+Open `http://localhost:5173` — **Judge score (live)** at `/dance-extras` demonstrates pay-per-call on Arc.
+
+### Local deployment (production build + API)
+
+After `npm run build`, serve the static app and the API together:
+
+```bash
+npm run start:local
+```
+
+This runs Express on **8787** and `vite preview` on **5173** with `/api` proxied (same as dev). Open `http://127.0.0.1:5173`. Use **Testnet** keys only; never commit `.env`.
+
+## Environment
+
+Create keys in **[Circle Console](https://console.circle.com/api-keys/create)** (use **Testnet** for hackathon). For an **API Key**, under **Applicable platforms → Web**, add an **Allowed domain** of `localhost` (omit the port — e.g. use `localhost`, not `localhost:5173`) so local Vite (`npm run dev`) can call Circle APIs from the browser when required. Add your production host when you deploy.
+
+Console offers three key types; map them like this:
+
+| Circle Console key | Use in DanceArc |
+|---------------------|-----------------|
+| **API Key** | Set as `CIRCLE_API_KEY` — backend calls to Circle **Gateway** (x402 verify/settle), **Wallets**, **Contracts** |
+| **Kit Key** | Set as `CIRCLE_KIT_KEY` — **Arc App Kit** / Bridge Kit / Stablecoin Kit when you wire `@circle-fin/app-kit` per [Bridge docs](https://docs.arc.network/app-kit/bridge) |
+| **Client Key** | Set as `VITE_CIRCLE_CLIENT_KEY` — **Modular Wallets SDK** in the browser (Vite only exposes `VITE_*` to the client) |
+
+| Variable | Purpose |
+|----------|---------|
+| `ARC_RECIPIENT` | `0x…` payee for native USDC microtransfers |
+| `PER_ACTION_USDC` | Default `0.001` (must be ≤ `0.01`) |
+| `CIRCLE_API_KEY` | Optional — Circle Gateway x402 verify (same email as hackathon registration is recommended) |
+| `CIRCLE_API_BASE_URL` | Optional — defaults to `https://api.circle.com` |
+| `CIRCLE_KIT_KEY` | Optional — App Kit / Bridge when integrated |
+| `VITE_CIRCLE_CLIENT_KEY` | Optional — Modular Wallets Client Key (SDK + “Test Modular API”) |
+| `VITE_CIRCLE_MODULAR_CLIENT_URL` | Optional — defaults to `https://modular-sdk.circle.com` |
+| `ARC_BURST_PRIVATE_KEY` | **Test only** — `npm run burst` sender key |
+| `BURST_COUNT` | Default `55` txs |
+| `BURST_AMOUNT_USDC` | Default `0.0005` per burst tx |
+
+## Hackathon demo: 50+ on-chain txs
+
+1. Fund Arc Testnet (native USDC gas) — [Connect to Arc](https://docs.arc.network/arc/references/connect-to-arc), [Circle faucet](https://faucet.circle.com/).
+2. Set `ARC_RECIPIENT` and `ARC_BURST_PRIVATE_KEY` in `.env` (use a throwaway test key).
+3. Run:
+
+```bash
+npm run burst
+```
+
+4. Paste explorer links or CSV of hashes for submission **transaction frequency** evidence.
+
+## Margin story (why not “normal” gas?)
+
+On many networks, **fixed per-tx overhead** in ETH or an unstable gas token destroys **sub-cent, per-event** pricing: you either **batch** (latency, custody) or **overcharge** (bad UX). **Arc + USDC-denominated gas + micro-native transfers** align the **fee unit** with the **business unit** (USDC) so high-frequency, low-dollar APIs and agents can settle **per action** without a subscription wrapper.
+
+## LLM bundle
+
+- `npm run build:llm` → `public/llm-full.txt`
+- Dev server: `/llm-full.txt`
+
+## License
+
+MIT
+
+
+---
+
+# File: docs/HACKATHON.md
+
+# Hackathon checklist (Agentic Economy on Arc)
+
+## Tracks
+
+This MVP aligns with **Per-API monetization** and **Usage-based compute billing**: paid `POST /api/judges/score` and `/api/dance-extras/live/judge-score/testnet` with **per-action pricing** (default **0.001 USDC**, configurable via `PER_ACTION_USDC`, must stay **≤ $0.01**).
+
+## Economic proof
+
+1. **Per-action pricing:** `PER_ACTION_USDC` (default `0.001`) — see `GET /api/health`.
+2. **Transaction frequency:** run `npm run burst` with a funded test key to produce **50+** Arc Testnet txs; hashes print to stdout (link recipient on ArcScan).
+3. **Margin vs traditional gas:** On general-purpose L1s, a single paid interaction often implies **base fee + priority fee** in a volatile gas token, frequently **orders of magnitude above** sub-cent unit economics unless you batch, subsidize, or custody. **Arc uses USDC for gas** and supports **high-frequency microflows** (Circle Nanopayments + Gateway x402) so **per-call** pricing can match **actual usage** without forcing subscription bundling.
+
+## Feedback ($500 USDC incentive)
+
+Document concrete integration notes for Circle (Gateway verify paths, Nanopayments UX, App Kit Bridge friction) in your final submission field.

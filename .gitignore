@@ -1,0 +1,8 @@
+node_modules
+dist
+.env
+.DS_Store
+*.log
+.circle-recovery/
+recovery_file_*.dat
+node_modules/.tmp

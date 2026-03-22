@@ -1,0 +1,45 @@
+.wallet-bar {
+  border: 1px solid #e4e4e7;
+  border-radius: 0.65rem;
+  padding: 0.65rem 0.85rem;
+  margin-bottom: 1rem;
+  background: linear-gradient(90deg, #faf5ff 0%, #fff 40%);
+}
+
+.wallet-bar__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+
+.wallet-bar__label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #71717a;
+}
+
+.wallet-bar__addr {
+  font-size: 0.82rem;
+  background: #f4f4f5;
+  padding: 0.2rem 0.45rem;
+  border-radius: 0.35rem;
+}
+
+.wallet-bar__none {
+  font-size: 0.88rem;
+  color: #71717a;
+}
+
+.wallet-bar .btn-sm {
+  padding: 0.35rem 0.65rem;
+  font-size: 0.82rem;
+}
+
+.wallet-bar__err {
+  margin: 0.5rem 0 0;
+  font-size: 0.82rem;
+  color: #b91c1c;
+}
